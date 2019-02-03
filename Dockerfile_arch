@@ -1,24 +1,32 @@
-#import archlinux-base-devel
+# import archlinux-base-devel
 FROM base/devel:latest
 
-#install dependencies for kernel building
+# install dependencies for kernel building
 RUN pacman -Sy git bc imagemagick xmlto python-sphinx graphviz --noconfirm
 
-#change number of processors here
-RUN sed -i -e 's/.*MAKEFLAGS=.*/MAKEFLAGS="j16"/' /etc/makepkg.conf
+# change number of processors here
+RUN sed -i -e 's/.*MAKEFLAGS=.*/MAKEFLAGS="j12"/' /etc/makepkg.conf
 
-#add a user other than root and use it to build the kernel;
-#Running makepkg as root is not allowed as it can cause permanent,
-catastrophic damage to your system.
+# add a user other than root and use it to build the kernel;
+# Running makepkg as root is not allowed as it can cause permanent,
+# catastrophic damage to your system.
 RUN useradd nonroot -m -d /home/nonroot
-USER nonroot
-WORKDIR /home/nonroot
 
 # copy the kernel fom AUR git and build it
-RUN git clone https://aur.archlinux.org/linux-cx2072x.git
-WORKDIR linux-cx2072x
+RUN mkdir --parents /home/nonroot/arch_package/src
+WORKDIR /home/nonroot/arch_package
+
+RUN git clone --depth 1 https://github.com/heikomat/linux.git --branch cx2072x --single-branch
+RUN cp -r linux/* ./src/
+RUN chown -R nonroot:nonroot /home/nonroot/arch_package
+
+USER nonroot
+COPY arch_package_config/60-linux.hook arch_package_config/90-linux.hook arch_package_config/config arch_package_config/config.fragment arch_package_config/linux.preset /home/nonroot/arch_package/src/
+COPY arch_package_config/PKGBUILD arch_package_config/linux.install /home/nonroot/arch_package/
+
+RUN ls -lah /home/nonroot/arch_package/src/scripts
 RUN makepkg
 
-#make a direcotry where we store the prebuild binaries, since docker doesn't support running "docker cp linux*xz"
+# make a direcotry where we store the prebuild binaries, since docker doesn't support running "docker cp linux*xz"
 RUN mkdir /home/nonroot/package
 RUN mv *.xz /home/nonroot/package

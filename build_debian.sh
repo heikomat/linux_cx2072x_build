@@ -1,4 +1,4 @@
-git@github.com:heikomat/linux.git#!/bin/bash
+#!/bin/bash
 
 IMAGE=linux-cx2072x-debian
 
@@ -8,6 +8,6 @@ docker rm $(docker ps -aq --filter name=${IMAGE})
 
 docker create --name ${IMAGE} ${IMAGE}
 
-docker cp ${IMAGE}:/root/build ../
+docker cp ${IMAGE}:/root/build ./debian_package/
 
 docker rm $(docker ps -aq --filter name=${IMAGE})
