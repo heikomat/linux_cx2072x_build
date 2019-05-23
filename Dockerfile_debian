@@ -12,8 +12,11 @@ WORKDIR /root/linux
 
 # configure the kernel
 RUN cp -v /boot/config-* .config
-RUN echo "CONFIG_SND_SOC_INTEL_CHT_CX2072X_MACH=m" >> .config
+RUN echo "CONFIG_SND_SOC_INTEL_BYT_CHT_CX2072X_MACH=m" >> .config
 RUN echo "CONFIG_SND_SOC_CX2072X=m" >> .config
+RUN echo "CONFIG_ACPI_ASUS=m" >> .config
+RUN echo "CONFIG_HID_ELAN=m" >> .config
+RUN echo "CONFIG_DEBUG_INFO=n" >> .config
 
 # build the kernel
 RUN make deb-pkg -j 12
